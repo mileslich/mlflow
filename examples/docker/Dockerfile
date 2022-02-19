@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3:4.10.3
 
-RUN pip install https://github.com/mileslich/mlflow \
+RUN pip install git+https://github.com/mileslich/mlflow \
     && pip install azure-storage-blob==12.3.0 \
     && pip install numpy==1.21.2 \
     && pip install scipy \
