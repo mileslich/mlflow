@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/miles/OneDrive/Desktop/mlflow/examples/docker/mlruns/0/b8308bc3815045638c10afba49fd5c72/artifacts
+end_time: 1645289435222
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+name: ''
+run_id: b8308bc3815045638c10afba49fd5c72
+run_uuid: b8308bc3815045638c10afba49fd5c72
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1645289430917
+status: 4
+tags: []
+user_id: miles

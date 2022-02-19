@@ -99,7 +99,7 @@ def test_docker_project_execution_async_docker_args(
 @pytest.mark.parametrize(
     "tracking_uri, expected_command_segment",
     [
-        (None, "-e MLFLOW_TRACKING_URI=/mlflow/tmp/mlruns"),
+        (None, "-e MLFLOW_TRACKING_URI=\mlflow\tmp\mlruns"),
         ("http://some-tracking-uri", "-e MLFLOW_TRACKING_URI=http://some-tracking-uri"),
         ("databricks://some-profile", "-e MLFLOW_TRACKING_URI=databricks "),
     ],
