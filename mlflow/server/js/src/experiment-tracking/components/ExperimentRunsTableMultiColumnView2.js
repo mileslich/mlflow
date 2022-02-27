@@ -1,12 +1,14 @@
 /**
  * Ag-grid based implementation of multi-column view with a bunch of new interactive features
  */
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { RunInfo } from '../sdk/MlflowMessages';
+import { Run } from '../sdk/MlflowMessages';
 import { Link } from 'react-router-dom';
 import Routes from '../routes';
 import Utils from '../../common/utils/Utils';
+import { getParams, paramsByRunUuid } from '../reducers/Reducers';
 
 import { AgGridReact } from '@ag-grid-community/react/main';
 import { Grid } from '@ag-grid-community/core';
@@ -87,6 +89,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
     versionCellRenderer: VersionCellRenderer,
     modelsCellRenderer: ModelsCellRenderer,
     dateCellRenderer: DateCellRenderer,
+    cloneCellRenderer: CloneCellRenderer,
     agColumnHeader: RunsTableCustomHeader,
     loadingOverlayComponent: Spinner,
     noRowsOverlayComponent: ExperimentRunsTableEmptyOverlay,
@@ -97,6 +100,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
     this.getColumnDefs = this.getColumnDefs.bind(this);
     this.state = {
       columnDefs: [],
+      disabled: false,
     };
   }
 
@@ -145,6 +149,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
 
   getColumnDefs() {
     const {
+      paramsList,
       metricKeyList,
       paramKeyList,
       categorizedUncheckedKeys,
@@ -297,6 +302,14 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           ...(i >= MAX_TAG_COLS ? { columnGroupShow: 'open' } : null),
         })),
       },
+      {
+        headerName: ATTRIBUTE_COLUMN_LABELS.CLONE,
+        field: 'clone',
+        cellRenderer: 'cloneCellRenderer',
+        cellRendererParams: {
+          params: paramsList,
+        }
+      },
     ];
   }
 
@@ -327,10 +340,11 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
       runsExpanded,
       nestChildren,
     });
-
+    
     const runs = mergedRows.map(({ idx, isParent, hasExpander, expanderOpen, childrenIds }) => {
       const tags = tagsList[idx];
       const params = paramsList[idx];
+
       const metrics = metricsList[idx].map(({ key, value }) => ({
         key,
         value: Utils.formatMetric(value),
@@ -366,6 +380,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         ...getNameValueMapFromList(visibleTags, visibleTagKeyList, TAG_PREFIX),
       };
     });
+    
 
     // don't show LoadMoreBar if there are no runs at all
     if (runs.length) {
@@ -378,6 +393,34 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
     }
 
     return runs;
+  }
+
+  getParameterstoClone() {
+    const {
+      runInfos,
+      paramsList,
+      paramKeyList,
+      tagsList,
+      runsExpanded,
+      nestChildren,
+    } = this.props;
+    const { getNameValueMapFromList } = ExperimentRunsTableMultiColumnView2;
+    const mergedRows = ExperimentViewUtil.getRowRenderMetadata({
+      runInfos,
+      tagsList,
+      runsExpanded,
+      nestChildren,
+    });
+    
+    const parameters = mergedRows.map(({ idx }) => {
+      const params = paramsList[idx];
+
+      return {
+        ...getNameValueMapFromList(params, paramKeyList, PARAM_PREFIX),
+      };
+    });
+
+    return parameters;
   }
 
   handleSelectionChange = (event) => {
@@ -515,7 +558,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
       },
     });
 
-    return (
+    return (      
       <div
         className={`ag-theme-balham multi-column-view ${agGridOverrides}`}
         data-test-id='detailed-runs-table-view'
@@ -558,6 +601,26 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
     );
   }
 }
+
+export function CloneCellRenderer(props) {
+  const {
+    runInfo,
+  } = props.data;
+
+  return (
+    <>
+      <button onClick = {
+        () => cloneRun(runInfo.run_uuid, runInfo)
+        }>Clone</button>
+    </>
+  );
+}
+
+export function cloneRun(params, props)
+{
+  console.log(getParams(params, props.entities));
+}
+
 
 function FullWidthCellRenderer({
   handleLoadMoreRuns,
