@@ -4,12 +4,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { RunInfo } from '../sdk/MlflowMessages';
-import { Run } from '../sdk/MlflowMessages';
 import { Link } from 'react-router-dom';
 import Routes from '../routes';
 import Utils from '../../common/utils/Utils';
-import { getParams, paramsByRunUuid } from '../reducers/Reducers';
-
 import { AgGridReact } from '@ag-grid-community/react/main';
 import { Grid } from '@ag-grid-community/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
@@ -157,7 +154,31 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
       orderByKey,
       orderByAsc,
       onSortBy,
+      runInfos,
+      tagsList,
+      runsExpanded,
+      nestChildren,
     } = this.props;
+    
+    const { getNameValueMapFromList } = ExperimentRunsTableMultiColumnView2;
+    const mergedRows = ExperimentViewUtil.getRowRenderMetadata({
+      runInfos,
+      tagsList,
+      runsExpanded,
+      nestChildren,
+    });
+
+    const params = mergedRows.map(({ idx }) => {
+      const params = paramsList[idx];
+      const runInfo = runInfos[idx];
+
+      const runUuid = runInfo.run_uuid;
+      return {
+        runUuid,
+        ...getNameValueMapFromList(params, paramKeyList, PARAM_PREFIX),
+      };
+    });
+
     const commonSortOrderProps = { orderByKey, orderByAsc, onSortBy };
     const getStyle = (key) => (key === this.props.orderByKey ? { backgroundColor: '#e6f7ff' } : {});
     const headerStyle = (key) => getStyle(key);
@@ -307,7 +328,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         field: 'clone',
         cellRenderer: 'cloneCellRenderer',
         cellRendererParams: {
-          params: paramsList,
+          params: params,
         }
       },
     ];
@@ -344,7 +365,6 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
     const runs = mergedRows.map(({ idx, isParent, hasExpander, expanderOpen, childrenIds }) => {
       const tags = tagsList[idx];
       const params = paramsList[idx];
-
       const metrics = metricsList[idx].map(({ key, value }) => ({
         key,
         value: Utils.formatMetric(value),
@@ -610,17 +630,21 @@ export function CloneCellRenderer(props) {
   return (
     <>
       <button onClick = {
-        () => cloneRun(runInfo.run_uuid, runInfo)
+        () => cloneRun(props.params, runInfo.run_uuid)
         }>Clone</button>
     </>
   );
 }
 
-export function cloneRun(params, props)
+export async function cloneRun(params, currentRunUuid)
 {
-  console.log(getParams(params, props.entities));
-}
+  for(let i = 0; i < params.length; i++){
+    if(params[i].runUuid === currentRunUuid)
+    {
 
+    }
+  }
+}
 
 function FullWidthCellRenderer({
   handleLoadMoreRuns,
