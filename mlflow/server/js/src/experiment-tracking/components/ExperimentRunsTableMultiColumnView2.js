@@ -27,6 +27,8 @@ import { getModelVersionPageRoute } from '../../model-registry/routes';
 import { css } from 'emotion';
 import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
 
+const axios = require('axios')
+
 const PARAM_PREFIX = '$$$param$$$';
 const METRIC_PREFIX = '$$$metric$$$';
 const TAG_PREFIX = '$$$tag$$$';
@@ -636,15 +638,47 @@ export function CloneCellRenderer(props) {
   );
 }
 
-export async function cloneRun(params, currentRunUuid)
+function handlePostQuery(query){
+
+  var myParams = {
+      data: query
+  }
+
+  if (query !== "") {
+      axios.post('http://127.0.0.1:8001/', myParams)
+          .then(function(response){
+              console.log(response);
+     //Perform action based on response
+      })
+      .catch(function(error){
+          console.log(error);
+     //Perform action based on error
+      });
+  } else {
+      alert("Don't >:(")
+  }
+}
+
+export function cloneRun(params, currentRunUuid)
 {
+  let parameters = "";
+
   for(let i = 0; i < params.length; i++){
     if(params[i].runUuid === currentRunUuid)
     {
+      let parameterArray = Object.entries(params[i]);
 
+      for(let j = 1; j < parameterArray.length; j++) {
+        parameters += "-P " + parameterArray[j][0].slice(12) + "=" + parameterArray[j][1] + " ";
+      }
     }
   }
+
+  handlePostQuery(parameters);
+
 }
+
+
 
 function FullWidthCellRenderer({
   handleLoadMoreRuns,
