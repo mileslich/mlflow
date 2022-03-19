@@ -638,14 +638,14 @@ export function CloneCellRenderer(props) {
   );
 }
 
-function handlePostQuery(query){
+async function handlePostQuery(query){
 
   var myParams = {
       data: query
   }
 
   if (query !== "") {
-      axios.post('http://127.0.0.1:8001/', myParams)
+      await axios.post('http://localhost:8001/', myParams)
           .then(function(response){
               console.log(response);
      //Perform action based on response
@@ -654,12 +654,10 @@ function handlePostQuery(query){
           console.log(error);
      //Perform action based on error
       });
-  } else {
-      alert("Don't >:(")
   }
 }
 
-export function cloneRun(params, currentRunUuid)
+export async function cloneRun(params, currentRunUuid)
 {
   let parameters = "";
 
@@ -674,8 +672,9 @@ export function cloneRun(params, currentRunUuid)
     }
   }
 
-  handlePostQuery(parameters);
+  await handlePostQuery(parameters);
 
+  window.location.reload(true);
 }
 
 
